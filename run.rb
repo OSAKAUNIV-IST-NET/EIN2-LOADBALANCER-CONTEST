@@ -17,12 +17,13 @@ PID_FILE_PREFIX_CLIENT = "client."
 PID_FILE_PREFIX_SERVER = "server."
 PID_DIR_PATH = PID_PATH + PID_DIR + "/"
 
+
 ## will be called, when Ctrl-c is sent
 Signal.trap(:INT){
-  STDERR.puts
-  STDERR.puts "invoke SIGINT"
-  kill_all_processes
-  exit 0
+	STDERR.puts
+	STDERR.puts "invoke SIGINT"
+	kill_all_processes
+	exit 0
 }
 
 ## kill all processes including servers, clients and trema
@@ -122,14 +123,32 @@ puts
 ## Start trema as daemon
 ## to kill easily by invoking "trema killall"
 cmd = TREMA + " run " + ARGV[1] + " -c " + ARGV[2] + " -d"
-begin
-  Thread.new( cmd ){ system cmd; }
-  puts "EXECUTE: " + cmd
-rescue
-  STDERR.puts "EXECUTE: " + cmd
-  STDERR.puts "  ERROR: pathes of trema or configuration files might be wrong."
-  exit 1
-end
+Thread.new  {
+
+	pid = fork {
+
+		begin
+
+			exec(cmd)
+
+		rescue
+	
+			kill_all_processes
+			exit 0
+
+		end
+
+	}
+
+}
+
+puts "EXECUTE: " + cmd
+
+#rescue
+#  STDERR.puts "EXECUTE: " + cmd
+#  STDERR.puts "  ERROR: pathes of trema or configuration files might be wrong."
+#  exit 1
+#end
 puts
 
 sleep(5)
@@ -146,6 +165,7 @@ pipes = []
 results = []
 
 ## run servers
+ctrlc_enable = true
 pids_s = [] # PID list of servers for wating to exit
 puts "START  : servers"
 puts
