@@ -7,6 +7,7 @@ require 'pp'
 require 'open3'
 
 TREMA = "trema"
+WTIME = 15
 CLIENT = "./bin/client"
 SERVER = "./bin/server"
 DIR_HP_FILE = "/tmp/"
@@ -17,6 +18,10 @@ PID_FILE_PREFIX_CLIENT = "client."
 PID_FILE_PREFIX_SERVER = "server."
 PID_DIR_PATH = PID_PATH + PID_DIR + "/"
 
+
+$pids_s = []
+$pids_c = []
+$pids_o = []
 
 ## will be called, when Ctrl-c is sent
 Signal.trap(:INT){
@@ -36,6 +41,7 @@ def kill_all_processes
   Dir::glob(pid_servers).each do |f|
     if File::ftype(f) == "file"
       pid_server = f.split( "." )[1]
+      $pids_s.delete(pid_server)
       begin
         File.delete(f)
         Process.kill('KILL', pid_server.to_i)
@@ -51,6 +57,7 @@ def kill_all_processes
   Dir::glob(pid_clients).each do |f|
     if File::ftype(f) == "file"
       pid_client = f.split( "." )[1]
+      $pids_c.delete(pid_client)
       begin
         File.delete(f)
         Process.kill('KILL', pid_client.to_i)
@@ -66,6 +73,23 @@ def kill_all_processes
   # for trema
   cmd = TREMA + " killall"
   system(cmd)
+
+  $pids_c.each{|pid|
+    if process_working?(pid.to_i) then Process.kill('KILL', pid.to_i) end
+  }
+  $pids_s.each{|pid|
+    if process_working?(pid.to_i) then Process.kill('KILL', pid.to_i) end
+  }
+
+end
+
+def process_working? (pid)
+  begin 
+    gid=Process.getpgid(pid)
+    return true
+  rescue
+    return false
+  end
 end
 
 ## check number of arguments, and print usage if wrong
@@ -124,22 +148,16 @@ puts
 ## to kill easily by invoking "trema killall"
 cmd = TREMA + " run " + ARGV[1] + " -c " + ARGV[2] + " -d"
 Thread.new  {
-
-	pid = fork {
-
-		begin
-
-			exec(cmd)
-
-		rescue
-	
-			kill_all_processes
-			exit 0
-
-		end
-
-	}
-
+  pid = fork {
+    begin
+      exec(cmd)
+    rescue
+      $pids_o.delete(pid)
+      kill_all_processes
+      exit 0
+    end
+  }
+  $pids_o << pid
 }
 
 puts "EXECUTE: " + cmd
@@ -151,7 +169,7 @@ puts "EXECUTE: " + cmd
 #end
 puts
 
-sleep(5)
+sleep(WTIME)
 
 ## parse config file
 fn = ARGV[0]
@@ -166,34 +184,31 @@ results = []
 
 ## run servers
 ctrlc_enable = true
-pids_s = [] # PID list of servers for wating to exit
 puts "START  : servers"
 puts
 conf["server"].each{|server|
-
   pin_in, pin_out = IO.pipe
   pout_in, pout_out = IO.pipe
   pipes << {"in" => pin_in, "out" => pout_out}
-
   Thread.new {
-
     pid = fork {
-
-      pin_in.close
-      pout_out.close
-      STDIN.reopen(pout_in)
-      STDOUT.reopen(pin_out)
-
-      if server["ip"] == "127.0.0.1"
-        cmd = "#{SERVER} #{server["ip"]} #{server["port"]} #{server["max_life"]} #{server["dec_life"]} #{server["sleep_time"]}"
-      else
-        cmd = "ip netns exec #{server["netns"]} #{SERVER} #{server["ip"]} #{server["port"]} #{server["max_life"]} #{server["dec_life"]} #{server["sleep_time"]}"
+      begin
+        pin_in.close
+        pout_out.close
+        STDIN.reopen(pout_in)
+        STDOUT.reopen(pin_out)
+        if server["ip"] == "127.0.0.1"
+          cmd = "#{SERVER} #{server["ip"]} #{server["port"]} #{server["max_life"]} #{server["dec_life"]} #{server["sleep_time"]}"
+        else
+          cmd = "ip netns exec #{server["netns"]} #{SERVER} #{server["ip"]} #{server["port"]} #{server["max_life"]} #{server["dec_life"]} #{server["sleep_time"]}"
+        end
+        exec(cmd)
+      rescue
+	$pids_s.delete(pid)
+        kill_all_processes
+        exit 0
       end
-
-      exec(cmd)
-      exit! 0
     }
-    
     # write PID to PID file
     if pid != nil
       pid_file_name = PID_DIR_PATH + PID_FILE_PREFIX_SERVER + pid.to_s
@@ -201,16 +216,12 @@ conf["server"].each{|server|
       f_pid.close
     end
     #
-    pids_s << pid
-
+    $pids_s << pid
     #
     pout_in.close
     pin_out.close
-
   }
-
   sleep(1)
-
 }
 
 sleep(3) # wait to complete starting of server
@@ -218,37 +229,38 @@ sleep(3) # wait to complete starting of server
 # run clients
 puts "START  : clients"
 puts
-pids_c = [] # PID list of clients for wating to exit
 conf["client"].each{|client|
-  pid = fork {
-
-  #if pid.nil?
-    if client["ip"] == "127.0.0.1"
-      cmd = "#{client["netns"]} #{CLIENT} #{client["ip"]} #{fn}"
-    else
-      cmd = "ip netns exec #{client["netns"]} #{CLIENT} #{client["ip"]} #{fn}"
+  Thread.new {
+    pid = fork {
+      begin
+        if client["ip"] == "127.0.0.1"
+          cmd = "#{client["netns"]} #{CLIENT} #{client["ip"]} #{fn}"
+        else
+          cmd = "ip netns exec #{client["netns"]} #{CLIENT} #{client["ip"]} #{fn}"
+        end
+        exec(cmd)
+        #exit! 0
+      rescue
+	$pids_c.delete(pid)
+        kill_all_processes
+        exit 0
+     end
+    }
+    # write PID to PID file
+    if pid != nil
+      pid_file_name = PID_DIR_PATH + PID_FILE_PREFIX_CLIENT + pid.to_s
+      f_pid = open(pid_file_name, "w")
+      f_pid.close
     end
-    exec(cmd)
-    exit! 0
-  #end
-
+    #
+    $pids_c << pid
   }
-
-  # write PID to PID file
-  if pid != nil
-    pid_file_name = PID_DIR_PATH + PID_FILE_PREFIX_CLIENT + pid.to_s
-    f_pid = open(pid_file_name, "w")
-    f_pid.close
-  end
-  #
-  pids_c << pid
 }
 
 ## wait for clients to exit, and delete PID files for clients
-while !pids_c.empty?
+while !$pids_c.empty?
   pid = Process.wait
-  pids_c.delete(pid)
-  
+  $pids_c.delete(pid)
   # delete PID file
   pid_file_tmp = PID_DIR_PATH + PID_FILE_PREFIX_CLIENT + pid.to_s
   if File.exists?(pid_file_tmp)
@@ -278,10 +290,9 @@ pipes.each{|pipe|
 }
 
 ## wait for servers to exit, and delete PID files for servers
-while !pids_s.empty?
+while !$pids_s.empty?
   pid = Process.wait
-  pids_s.delete(pid)
-  
+  $pids_s.delete(pid)
   # delete PID file
   pid_file_tmp = PID_PATH + PID_DIR + "/" + PID_FILE_PREFIX_SERVER + pid.to_s
   if File.exists?(pid_file_tmp)
@@ -304,3 +315,4 @@ cmd = TREMA + " killall"
 system(cmd)
 
 Process.waitall
+
