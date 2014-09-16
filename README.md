@@ -37,11 +37,11 @@ json 形式で記述
 |-- n_pkts   : 送信するパケット数（0 は無限に送信）  
 |-- duration : 送信する時間（0 は無限に送信）  
 |-+ client   : クライアントに関する設定  
-| |- netns       : netns 名  
-| |- ip          : IP アドレス  
-| \`- ack_timeout : ACK タイムアウト時間  
+|&nbsp;|- netns       : netns 名  
+|&nbsp;|- ip          : IP アドレス  
+|&nbsp;\`- ack_timeout : ACK タイムアウト時間  
 \`-+ server   : サーバに関する設定  
-  |- netns       : netns 名  
+&nbsp;　&nbsp;|- netns       : netns 名  
   |- ip          : IP アドレス  
   |- port        : 待ち受けポート番号  
   |- max_life    : HP の最大値  
@@ -52,7 +52,7 @@ json 形式で記述
 サーバ 1 台，クライアント 1 台で構成され，パケットを 10 秒間送信し続ける．  
 ただし，送信パケット数の上限はなし  
 
-`{  
+{  
     "n_pkts" : 0,  
     "duration" : 10,  
     "client" : [  
@@ -72,7 +72,7 @@ json 形式で記述
 	    "sleep_time" : 5  
 	}  
     ]  
-}`  
+}  
 
 # サーバ，クライアント
 サーバ，クライアント間でパケットおよび ACK をやりとりし，サーバが受信できたパケット数に応じて得点を与える．
