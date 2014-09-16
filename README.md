@@ -34,24 +34,27 @@ json 形式で記述
 なお，いずれかの上限に達した時点で送信を終了する．  
 
 ## 指定できるパラメータ
+<xmp>
 |-- n_pkts   : 送信するパケット数（0 は無限に送信）  
 |-- duration : 送信する時間（0 は無限に送信）  
 |-+ client   : クライアントに関する設定  
-|&nbsp;|- netns       : netns 名  
-|&nbsp;|- ip          : IP アドレス  
-|&nbsp;\`- ack_timeout : ACK タイムアウト時間  
+| |- netns       : netns 名  
+| |- ip          : IP アドレス  
+| \`- ack_timeout : ACK タイムアウト時間  
 \`-+ server   : サーバに関する設定  
-&nbsp;　&nbsp;|- netns       : netns 名  
+  |- netns       : netns 名  
   |- ip          : IP アドレス  
   |- port        : 待ち受けポート番号  
   |- max_life    : HP の最大値  
   |- dec_life    : HP の減少幅  
   \`- sleep_time  : HP が 0 になった後に回復するまでのスリープ時間  
+</xmp>
 
 ## 設定ファイルの例
 サーバ 1 台，クライアント 1 台で構成され，パケットを 10 秒間送信し続ける．  
 ただし，送信パケット数の上限はなし  
 
+<pre>
 {  
     "n_pkts" : 0,  
     "duration" : 10,  
@@ -73,6 +76,7 @@ json 形式で記述
 	}  
     ]  
 }  
+</pre>
 
 # サーバ，クライアント
 サーバ，クライアント間でパケットおよび ACK をやりとりし，サーバが受信できたパケット数に応じて得点を与える．
