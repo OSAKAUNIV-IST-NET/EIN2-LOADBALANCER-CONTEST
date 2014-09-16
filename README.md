@@ -1,7 +1,7 @@
 # 実行方法（要 root 権限）
 sudo ./run.rb <level config> <load balancer> <network config>
 
-Ex.) sudo ./run.rb conf/level-1.conf load_balancer.rb conf/network.conf
+Ex.) `sudo ./run.rb conf/level-1.conf load_balancer.rb conf/network.conf`
 
 
 # run.rb
