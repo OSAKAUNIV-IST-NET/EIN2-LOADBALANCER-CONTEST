@@ -18,6 +18,7 @@ Ex.) `sudo ./run.rb conf/level-1.conf load_balancer.rb conf/network.conf`
 7. 実行したプロセスを kill する．
 
 ## 指定できるパラメータ（[xxx] は初期値）
+<pre>
 |-- TREMA          : 実行ファイル "trema" のパス [../trema/trema]  
 |-- CLIENT         : 実行ファイル "client" のパス [./bin/client]  
 |-- SERVER         : 実行ファイル "server" のパス [./bin/server]  
@@ -27,6 +28,7 @@ Ex.) `sudo ./run.rb conf/level-1.conf load_balancer.rb conf/network.conf`
 |-- PID_DIR        : PID ファイルを置くディレクトリの名前 [OpenFlow-LB]  
 |-- PID_FILE_PREFIX_CLIENT : クライアント用の PID ファイルの名前の先頭 [client.] # client.\<PID\>  
 \`-- PID_FILE_PREFIX_SERVER : サーバ用の PID ファイルの名前の先頭 [server.] # server.\<PID\>  
+</pre>
 
 # 設定ファイル（level-?.conf）
 json 形式で記述  
@@ -34,7 +36,7 @@ json 形式で記述
 なお，いずれかの上限に達した時点で送信を終了する．  
 
 ## 指定できるパラメータ
-<xmp>
+<pre>
 |-- n_pkts   : 送信するパケット数（0 は無限に送信）  
 |-- duration : 送信する時間（0 は無限に送信）  
 |-+ client   : クライアントに関する設定  
@@ -48,7 +50,7 @@ json 形式で記述
   |- max_life    : HP の最大値  
   |- dec_life    : HP の減少幅  
   \`- sleep_time  : HP が 0 になった後に回復するまでのスリープ時間  
-</xmp>
+</pre>
 
 ## 設定ファイルの例
 サーバ 1 台，クライアント 1 台で構成され，パケットを 10 秒間送信し続ける．  
