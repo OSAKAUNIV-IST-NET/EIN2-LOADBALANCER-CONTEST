@@ -1,7 +1,7 @@
 # run.rb
-trema，サーバ，クライアントを実行するスクリプト
-* 各動作の間に処理待ちのためにスリープを入れており，スリープ時間を計算機の動作速度に合わせて調整する必要あり
-* trema，サーバ，クライアントのパスを適切に設定する必要あり
+trema，サーバ，クライアントを実行するスクリプト  
+各動作の間に処理待ちのためにスリープを入れており，スリープ時間を計算機の動作速度に合わせて調整する必要あり  
+trema，サーバ，クライアントのパスを適切に設定する必要あり  
 
 ## 実行方法（要 root 権限）
 `sudo ./run.rb <level config> <load balancer> <network config>`
@@ -22,16 +22,16 @@ Ex.) `sudo ./run.rb conf/level-1.conf load_balancer.rb conf/network.conf`
 |-- CLIENT         : 実行ファイル "client" のパス [./bin/client]  
 |-- SERVER         : 実行ファイル "server" のパス [./bin/server]  
 |-- DIR_HP_FILE    : HP ファイルを置くディレクトリ [/tmp/]  
-|-- HP_FILE_PREFIX : HP ファイルの名前の先頭 [server] # server_<IP address>_<MAC address>  
+|-- HP_FILE_PREFIX : HP ファイルの名前の先頭 [server] # server_\<IP address\>_\<MAC address\>  
 |-- PID_PATH       : 実行したプロセスを記憶しておくための PID ファイルのディレクトリを置くディレクトリ [/tmp/]  
 |-- PID_DIR        : PID ファイルを置くディレクトリの名前 [OpenFlow-LB]  
-|-- PID_FILE_PREFIX_CLIENT : クライアント用の PID ファイルの名前の先頭 [client.] # client.<PID>  
-`-- PID_FILE_PREFIX_SERVER : サーバ用の PID ファイルの名前の先頭 [server.] # server.<PID>  
+|-- PID_FILE_PREFIX_CLIENT : クライアント用の PID ファイルの名前の先頭 [client.] # client.\<PID\>  
+\`-- PID_FILE_PREFIX_SERVER : サーバ用の PID ファイルの名前の先頭 [server.] # server.\<PID\>  
 
 # 設定ファイル（level-?.conf）
-*json 形式で記述
-*クライアントは，設定ファイル中で指定されたパケット数もしくは送信時間の上限に達するまでパケットを送信
-*なお，いずれかの上限に達した時点で送信を終了する．
+json 形式で記述  
+クライアントは，設定ファイル中で指定されたパケット数もしくは送信時間の上限に達するまでパケットを送信  
+なお，いずれかの上限に達した時点で送信を終了する．  
 
 ## 指定できるパラメータ
 |-- n_pkts   : 送信するパケット数（0 は無限に送信）  
@@ -39,14 +39,14 @@ Ex.) `sudo ./run.rb conf/level-1.conf load_balancer.rb conf/network.conf`
 |-+ client   : クライアントに関する設定  
 | |- netns       : netns 名  
 | |- ip          : IP アドレス  
-| `- ack_timeout : ACK タイムアウト時間  
-`-+ server   : サーバに関する設定  
+| \`- ack_timeout : ACK タイムアウト時間  
+\`-+ server   : サーバに関する設定  
   |- netns       : netns 名  
   |- ip          : IP アドレス  
   |- port        : 待ち受けポート番号  
   |- max_life    : HP の最大値  
   |- dec_life    : HP の減少幅  
-  `- sleep_time  : HP が 0 になった後に回復するまでのスリープ時間  
+  \`- sleep_time  : HP が 0 になった後に回復するまでのスリープ時間  
 
 ## 設定ファイルの例
 サーバ 1 台，クライアント 1 台で構成され，パケットを 10 秒間送信し続ける．  
