@@ -23,11 +23,11 @@ Ex.) `sudo ./run.rb conf/level-1.conf load_balancer.rb conf/network.conf`
 |-- CLIENT         : 実行ファイル "client" のパス [./bin/client]  
 |-- SERVER         : 実行ファイル "server" のパス [./bin/server]  
 |-- DIR_HP_FILE    : HP ファイルを置くディレクトリ [/tmp/]  
-|-- HP_FILE_PREFIX : HP ファイルの名前の先頭 [server] # server_\<IP address\>_\<MAC address\>  
+|-- HP_FILE_PREFIX : HP ファイルの名前の先頭 [server] # server_&lt;IP address&gt;_&lt;MAC address&gt;  
 |-- PID_PATH       : 実行したプロセスを記憶しておくための PID ファイルのディレクトリを置くディレクトリ [/tmp/]  
 |-- PID_DIR        : PID ファイルを置くディレクトリの名前 [OpenFlow-LB]  
-|-- PID_FILE_PREFIX_CLIENT : クライアント用の PID ファイルの名前の先頭 [client.] # client.\<PID\>  
-\`-- PID_FILE_PREFIX_SERVER : サーバ用の PID ファイルの名前の先頭 [server.] # server.\<PID\>  
+|-- PID_FILE_PREFIX_CLIENT : クライアント用の PID ファイルの名前の先頭 [client.] # client.&lt;PID&gt;  
+`-- PID_FILE_PREFIX_SERVER : サーバ用の PID ファイルの名前の先頭 [server.] # server.&lt;PID&gt;  
 </pre>
 
 # 設定ファイル（level-?.conf）
@@ -42,14 +42,14 @@ json 形式で記述
 |-+ client   : クライアントに関する設定  
 | |- netns       : netns 名  
 | |- ip          : IP アドレス  
-| \`- ack_timeout : ACK タイムアウト時間  
-\`-+ server   : サーバに関する設定  
+| `- ack_timeout : ACK タイムアウト時間  
+`-+ server   : サーバに関する設定  
   |- netns       : netns 名  
   |- ip          : IP アドレス  
   |- port        : 待ち受けポート番号  
   |- max_life    : HP の最大値  
   |- dec_life    : HP の減少幅  
-  \`- sleep_time  : HP が 0 になった後に回復するまでのスリープ時間  
+  `- sleep_time  : HP が 0 になった後に回復するまでのスリープ時間  
 </pre>
 
 ## 設定ファイルの例
@@ -97,7 +97,7 @@ json 形式で記述
 サーバプログラム  
 自身の IP アドレスを取得するために /sys/class/net/ 中の "trema" で始まるインターフェースの IP アドレスを利用  
  （少なくとも）"eth0" 的な形式で "trema0" のようなインターフェース名が振られている．  
-!! Ubuntu 10.04（kernel 3.2.0）で動作を確認しているが，kernel および trema のバージョンが変わると  
+!! Ubuntu 12.04（kernel 3.2.0）で動作を確認しているが，kernel および trema のバージョンが変わると  
 !! ファイル名などが変わる可能性があるため要注意  
 !! また，"trema" で始まるインターフェースが複数ある場合は正しく動作しない  
 
